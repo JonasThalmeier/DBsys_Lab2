@@ -13,6 +13,10 @@ public class Tuple implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private TupleDesc td;
+    private RecordId rid;
+    private Field[] fields;
+
     /**
      * Create a new tuple with the specified schema (type).
      *
@@ -22,6 +26,11 @@ public class Tuple implements Serializable {
      */
     public Tuple(TupleDesc td) {
         // some code goes here
+        if (td == null) {
+            throw new IllegalArgumentException("TupleDesc cannot be null");
+        }
+        this.td = td;
+        this.fields = new Field[td.numFields()];
     }
 
     /**
@@ -29,7 +38,8 @@ public class Tuple implements Serializable {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return td;
+        // return null;
     }
 
     /**
@@ -38,7 +48,8 @@ public class Tuple implements Serializable {
      */
     public RecordId getRecordId() {
         // some code goes here
-        return null;
+        return rid;
+        // return null;
     }
 
     /**
@@ -49,6 +60,7 @@ public class Tuple implements Serializable {
      */
     public void setRecordId(RecordId rid) {
         // some code goes here
+        this.rid = rid;
     }
 
     /**
@@ -61,6 +73,10 @@ public class Tuple implements Serializable {
      */
     public void setField(int i, Field f) {
         // some code goes here
+        if (i < 0 || i >= fields.length) {
+            throw new IllegalArgumentException("Field index out of bounds");
+        }
+        this.fields[i] = f;
     }
 
     /**
@@ -71,7 +87,11 @@ public class Tuple implements Serializable {
      */
     public Field getField(int i) {
         // some code goes here
-        return null;
+        if (i < 0 || i >= fields.length) {
+            throw new IllegalArgumentException("Field index out of bounds");
+        }
+        return fields[i];
+        // return null;
     }
 
     /**
@@ -82,9 +102,17 @@ public class Tuple implements Serializable {
      *
      * where \t is any whitespace (except a newline)
      */
+    @Override
     public String toString() {
         // some code goes here
-        throw new UnsupportedOperationException("Implement this");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fields.length; i++) {
+            sb.append(fields[i]);
+            if (i < fields.length - 1) {
+                sb.append("\t");
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -94,7 +122,8 @@ public class Tuple implements Serializable {
     public Iterator<Field> fields()
     {
         // some code goes here
-        return null;
+        return Arrays.asList(fields).iterator();
+        // return null;
     }
 
     /**
@@ -103,5 +132,7 @@ public class Tuple implements Serializable {
     public void resetTupleDesc(TupleDesc td)
     {
         // some code goes here
+        this.td = td;
+        this.fields = new Field[td.numFields()];
     }
 }
