@@ -1,7 +1,7 @@
 package simpledb;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * BufferPool manages the reading and writing of pages into memory from
@@ -27,7 +27,7 @@ public class BufferPool {
 
     private final int numPages;
 
-    private final HashMap<PageId, Page> bufferpool;
+    private final ConcurrentHashMap<PageId, Page> bufferpool;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -37,7 +37,7 @@ public class BufferPool {
     public BufferPool(int numPages) {
         // some code goes here
         this.numPages = numPages;
-        this.bufferpool = new HashMap<>(numPages);
+        this.bufferpool = new ConcurrentHashMap<>(numPages);
     }
     
     public static int getPageSize() {
