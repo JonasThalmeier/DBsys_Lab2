@@ -1,8 +1,7 @@
 package simpledb;
 
 import java.io.*;
-
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 /**
  * BufferPool manages the reading and writing of pages into memory from
@@ -26,6 +25,10 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
+    private final int numPages;
+
+    private final HashMap<PageId, Page> bufferpool;
+
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
@@ -33,6 +36,8 @@ public class BufferPool {
      */
     public BufferPool(int numPages) {
         // some code goes here
+        this.numPages = numPages;
+        this.bufferpool = new HashMap<>(numPages);
     }
     
     public static int getPageSize() {
@@ -67,7 +72,20 @@ public class BufferPool {
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         // some code goes here
-        return null;
+
+        if (bufferpool.containsKey(pid)) {
+            return bufferpool.get(pid);
+        }
+
+        if (bufferpool.size() >= numPages) {
+            throw new DbException("Bufferpool is full");
+        }
+
+        Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
+
+        bufferpool.put(pid, pageBuffer);
+
+        return pageBuffer;
     }
 
     /**
