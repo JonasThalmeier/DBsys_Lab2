@@ -67,8 +67,10 @@ public class HeapPage implements Page {
     */
     private int getNumTuples() {        
         // some code goes here
-        return 0;
-
+    	Integer tupleSize=Database.getCatalog().getTupleDesc(this.pid.getTableId()).getSize();
+        BufferPool bp=Database.getBufferPool();
+        int pageSize=bp.getPageSize();
+		return (pageSize*8)/(tupleSize*8+1); // cast to an integer, no need of floor method.
     }
 
     /**
@@ -78,7 +80,8 @@ public class HeapPage implements Page {
     private int getHeaderSize() {        
         
         // some code goes here
-        return 0;
+        return (int) Math.ceil(this.getNumTuples()/8);
+        
                  
     }
     
@@ -112,7 +115,7 @@ public class HeapPage implements Page {
      */
     public HeapPageId getId() {
     // some code goes here
-    throw new UnsupportedOperationException("implement this");
+    return this.pid;  //should i handle null cases?
     }
 
     /**
@@ -282,7 +285,14 @@ public class HeapPage implements Page {
      */
     public int getNumEmptySlots() {
         // some code goes here
-        return 0;
+    	//iterate over all the slots and check if they are used 
+    	int countNotUsed=0;
+    	for (int i=0; i<this.tuples.length; i++) {
+    		if (!this.isSlotUsed(i)) {
+    			countNotUsed++;
+    		}
+    	}
+        return countNotUsed;
     }
 
     /**
