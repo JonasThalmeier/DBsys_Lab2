@@ -42,7 +42,6 @@ public class HeapPageId implements PageId {
      */
     public int hashCode() {
         // some code goes here
-        
     	if(this.pgNo!=null  && this.tableId!=null){
 	        String hashCode=(this.tableId+""+this.pgNo);
 	        return Integer.parseInt(hashCode);
