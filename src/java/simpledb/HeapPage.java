@@ -300,7 +300,21 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         // some code goes here
-        return false;
+        if (i<0 || i>this.numSlots) {
+        	throw new IllegalArgumentException("Slot number must be a valid number");
+        }
+        
+        //extract the byte the slot is contained in 
+        int byteIndex=i/8; 
+        
+        //extract the position inside the byte 
+        int bitOffset=i%8;
+        
+        //extract the full byte
+        byte headerByte=header[byteIndex]; 
+        
+        //check if used or not-->use a mask to isolate only bit we are interested in
+        return (headerByte & (1<<bitOffset))!=0;
     }
 
     /**
@@ -317,7 +331,35 @@ public class HeapPage implements Page {
      */
     public Iterator<Tuple> iterator() {
         // some code goes here
-        return null;
+    	List<Tuple> allUsedTuples=new ArrayList<>();
+    	for (int i=0; i<this.numSlots; i++) {
+    		if (this.isSlotUsed(i)) {
+    			allUsedTuples.add(this.tuples[i]);
+    		}
+    	}
+    	
+    	//customize the iterator in order to deny remove method
+    	return new Iterator<Tuple>() {
+    		
+    		private Iterator<Tuple> internalIterator=allUsedTuples.iterator();
+    		
+    		@Override
+            public boolean hasNext() {
+                return internalIterator.hasNext();
+            }
+
+            @Override
+            public Tuple next() {
+                return internalIterator.next();
+            }
+            
+            //change remove method
+            @Override  
+            public void remove() {
+                throw new UnsupportedOperationException("remove() is not supported.");
+            }
+    	};
+        
     }
 
 }

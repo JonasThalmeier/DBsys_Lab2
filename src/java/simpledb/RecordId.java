@@ -59,7 +59,9 @@ public class RecordId implements Serializable {
     	}
     	else{
     		RecordId object= (RecordId) o;
-    		return this.tupleno==o;
+    		
+    		//same record id must refer to the same page and same slot;
+    		return (this.pid.equals(object.pid) && this.tupleno.equals(object.tupleno));	
     	}
         
     }
