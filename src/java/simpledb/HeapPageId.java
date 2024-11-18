@@ -1,4 +1,6 @@
 package simpledb;
+import java.util.Objects;
+
 
 /** Unique identifier for HeapPage objects. */
 public class HeapPageId implements PageId {
@@ -43,8 +45,9 @@ public class HeapPageId implements PageId {
     public int hashCode() {
         // some code goes here
     	if(this.pgNo!=null  && this.tableId!=null){
-	        String hashCode=(this.tableId+""+this.pgNo);
-	        return Integer.parseInt(hashCode);
+	        //String hashCode=(this.tableId+""+this.pgNo); //This code caused the overflow
+	        //return Integer.parseInt(hashCode);
+            return Objects.hash(tableId, pgNo);
     	}else {
     		 throw new IllegalStateException("PageId is in an invalid state: tableId or pgNo is null.");
     	}

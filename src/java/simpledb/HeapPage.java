@@ -80,7 +80,7 @@ public class HeapPage implements Page {
     private int getHeaderSize() {        
         
         // some code goes here
-        return (int) Math.ceil(this.getNumTuples()/8);
+        return (int) Math.ceil(this.getNumTuples()/8.0);
         
                  
     }
@@ -300,7 +300,7 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         // some code goes here
-        if (i<0 || i>this.numSlots) {
+        if (i<0 || i>=this.numSlots) {
         	throw new IllegalArgumentException("Slot number must be a valid number");
         }
         
@@ -309,7 +309,7 @@ public class HeapPage implements Page {
         
         //extract the position inside the byte 
         int bitOffset=i%8;
-        
+
         //extract the full byte
         byte headerByte=header[byteIndex]; 
         
