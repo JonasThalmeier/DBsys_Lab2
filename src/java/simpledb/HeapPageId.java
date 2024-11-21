@@ -70,7 +70,7 @@ public class HeapPageId implements PageId {
             return false;
         }else {
         	HeapPageId other = (HeapPageId) o;
-            return this.tableId == other.tableId && this.pgNo == other.pgNo;
+            return this.tableId.equals(other.tableId) && this.pgNo.equals(other.pgNo);
     	}
     }
 
