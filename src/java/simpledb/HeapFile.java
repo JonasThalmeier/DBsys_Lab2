@@ -214,39 +214,11 @@ public class HeapFile implements DbFile {
     		@Override
             public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
     			//check if there are more pages
-    			
-    			if (!this.hasNext()) {
-    		        throw new NoSuchElementException("No more tuples in the iterator");
-    		    }
-                
+    			if (!this.hasNext()) {throw new NoSuchElementException("No more tuples in the iterator");}
     			Tuple nextTuple=null;
-    			
     			//check if we are at the end of the current page
-    			if (!currentPageIterator.hasNext()) {
-    		        // If we are at the end of the current page, move to the next page
-    		        // Increment the page index and get the new page's iterator
-    		        currentPageIndex++;
-    		        boolean flag=true;
-    		        
-    		        //iterate until we find a new tuple to be read;
-    		        while (flag & currentPageIndex < numPages) {
-    		            currentPageIterator = getPageIterator(currentPageIndex);
-    		            if (currentPageIterator.hasNext()) {
-    		            	//read new tuple and stop while loop
-    		            	flag=false;
-    		            	nextTuple=currentPageIterator.next();
-    		            }
-    		            //increase page if did not fund tuples (empty page)
-    		            currentPageIndex++;
-    		        } 
-    		    }else {
-    		    	//get the next tuple in the page if it exists
-        			nextTuple = currentPageIterator.next();
-    		    }
-    			
+    			nextTuple=this.currentPageIterator.next();
     			return nextTuple;
-    			
-                
             }
     		
     		
