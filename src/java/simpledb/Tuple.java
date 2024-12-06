@@ -39,7 +39,6 @@ public class Tuple implements Serializable {
     public TupleDesc getTupleDesc() {
         // some code goes here
         return td;
-        // return null;
     }
 
     /**
@@ -49,7 +48,6 @@ public class Tuple implements Serializable {
     public RecordId getRecordId() {
         // some code goes here
         return rid;
-        // return null;
     }
 
     /**
@@ -91,7 +89,6 @@ public class Tuple implements Serializable {
             throw new IllegalArgumentException("Field index out of bounds");
         }
         return fields[i];
-        // return null;
     }
 
     /**
@@ -123,7 +120,6 @@ public class Tuple implements Serializable {
     {
         // some code goes here
         return Arrays.asList(fields).iterator();
-        // return null;
     }
 
     /**

@@ -75,8 +75,6 @@ public class RecordId implements Serializable {
     @Override
     public int hashCode() {
         // some code goes here
-    	
-    	//IS THIS ENOUGH? SHOULD I CONCATENATE THE ID'S INSTEAD OF USING THE METHOD HASH? 
     	return Objects.hash(pid, tupleno);
     	
        

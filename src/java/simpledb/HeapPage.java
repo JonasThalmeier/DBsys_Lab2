@@ -67,6 +67,8 @@ public class HeapPage implements Page {
     */
     private int getNumTuples() {        
         // some code goes here
+    	
+    	
     	Integer tupleSize=Database.getCatalog().getTupleDesc(this.pid.getTableId()).getSize();
         BufferPool bp=Database.getBufferPool();
         int pageSize=bp.getPageSize();
@@ -115,7 +117,7 @@ public class HeapPage implements Page {
      */
     public HeapPageId getId() {
     // some code goes here
-    return this.pid;  //should i handle null cases?
+    return this.pid;  
     }
 
     /**

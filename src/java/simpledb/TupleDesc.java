@@ -7,11 +7,12 @@ import java.util.*;
  * TupleDesc describes the schema of a tuple.
  */
 public class TupleDesc implements Serializable {
-    private List<TDItem> items;  // Am I allowed to just add this????
+    private List<TDItem> items;  // Initialize a list for storing all the items
 
     /**
      * A help class to facilitate organizing the information of each field
      * */
+    
     public static class TDItem implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -44,7 +45,6 @@ public class TupleDesc implements Serializable {
     public Iterator<TDItem> iterator() {
         // some code goes here
         return items.iterator();
-        // return null;
     }
 
     private static final long serialVersionUID = 1L;
@@ -81,6 +81,7 @@ public class TupleDesc implements Serializable {
      */
     public TupleDesc(Type[] typeAr) {
         // some code goes here
+    	
         if (typeAr == null) {
             throw new IllegalArgumentException("Type array must be non-null.");
         }
@@ -97,7 +98,6 @@ public class TupleDesc implements Serializable {
     public int numFields() {
         // some code goes here
         return items.size();
-        // return 0;
     }
 
     /**
@@ -115,7 +115,6 @@ public class TupleDesc implements Serializable {
             throw new NoSuchElementException("Index " + i + " is out of bounds.");
         }
         return items.get(i).fieldName;
-        // return null;
     }
 
     /**
@@ -134,7 +133,6 @@ public class TupleDesc implements Serializable {
             throw new NoSuchElementException("Index " + i + " is out of bounds.");
         }
         return items.get(i).fieldType;
-        // return null;
     }
 
     /**
@@ -154,7 +152,6 @@ public class TupleDesc implements Serializable {
             }
         }
         throw new NoSuchElementException("Field name '" + name + "' not found.");
-        //return 0;
     }
 
     /**
@@ -168,7 +165,6 @@ public class TupleDesc implements Serializable {
             size += item.fieldType.getLen();
         }
         return size;
-        //return 0;
     }
 
     /**
@@ -233,7 +229,6 @@ public class TupleDesc implements Serializable {
             }
         }
         return true;
-        // return false;
     }
 
     public int hashCode() {
@@ -262,6 +257,5 @@ public class TupleDesc implements Serializable {
             }
         }
         return sb.toString();
-        // return "";
     }
 }

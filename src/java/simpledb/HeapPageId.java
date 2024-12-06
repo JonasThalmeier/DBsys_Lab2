@@ -4,6 +4,7 @@ import java.util.Objects;
 
 /** Unique identifier for HeapPage objects. */
 public class HeapPageId implements PageId {
+	
 	private Integer tableId;
 	private Integer pgNo;
 	

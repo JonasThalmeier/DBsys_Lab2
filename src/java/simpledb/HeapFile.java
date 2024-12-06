@@ -61,7 +61,6 @@ public class HeapFile implements DbFile {
     public int getId() {
         // some code goes here
     	return this.f.getAbsoluteFile().hashCode();
-        //throw new UnsupportedOperationException("implement this");
     	
     }
 
@@ -73,11 +72,10 @@ public class HeapFile implements DbFile {
     public TupleDesc getTupleDesc() {
         // some code goes here
     	return this.td;
-        //throw new UnsupportedOperationException("implement this");
     }
 
     // see DbFile.java for javadocs
-    //read a page from disk and create a HeapPage out of the read data.
+    //read a page from disk and s a HeapPage out of the read data.
     public Page readPage(PageId pid) {
         // some code goes here
     	

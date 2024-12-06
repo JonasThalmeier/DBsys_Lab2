@@ -96,7 +96,6 @@ public class Catalog {
             throw new NoSuchElementException("Table with name " + name + " does not exist.");
         }
         return tableId;
-        // return 0;
     }
 
     /**
@@ -112,7 +111,6 @@ public class Catalog {
             throw new NoSuchElementException("Table with ID " + tableid + " does not exist.");
         }
         return table.file.getTupleDesc();
-        // return null;
     }
 
     /**
@@ -128,7 +126,6 @@ public class Catalog {
             throw new NoSuchElementException("Table with ID " + tableid + " does not exist.");
         }
         return table.file;
-        // return null;
     }
 
     public String getPrimaryKey(int tableid) {
@@ -138,13 +135,11 @@ public class Catalog {
                 throw new NoSuchElementException("Table with ID " + tableid + " does not exist.");
             }
             return table.primaryKey;
-        // return null;
     }
 
     public Iterator<Integer> tableIdIterator() {
         // some code goes here
         return tablesById.keySet().iterator();
-        // return null;
     }
 
     public String getTableName(int id) {
@@ -154,7 +149,6 @@ public class Catalog {
                 throw new NoSuchElementException("Table with ID " + id + " does not exist.");
             }
             return table.name;
-        // return null;
     }
     
     /** Delete all tables from the catalog */
