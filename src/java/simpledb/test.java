@@ -1,23 +1,24 @@
 package simpledb;
-
 import java.io.*;
 
-public class ScanQuery {
-    public static void main(String[] argv) {
-// construct table schema
-        Type types[] = new Type[]{Type.INT_TYPE, Type.INT_TYPE, Type.INT_TYPE, Type.INT_TYPE};
-        String names[] = new String[]{"f0", "f1", "f2", "f3"};
+public class test {
+	
+	public static void main(String[] argv) {
+        // Define table schema
+        Type[] types = new Type[]{ Type.INT_TYPE, Type.INT_TYPE, Type.INT_TYPE, Type.INT_TYPE };
+        String[] names = new String[]{ "f0", "f1", "f2", "f3" };
         TupleDesc descriptor = new TupleDesc(types, names);
-// create the table, associate it with some_data_file.dat
-// and tell the catalog about the schema of this table.
+
+        // Create the table and add it to the catalog
         HeapFile table1 = new HeapFile(new File("some_data_file.dat"), descriptor);
         Database.getCatalog().addTable(table1, "test");
-// construct the query: we use a simple SeqScan, which spoonfeeds
-// tuples via its iterator.
+
+        // Construct a sequential scan query
         TransactionId tid = new TransactionId();
         SeqScan f = new SeqScan(tid, table1.getId());
+
         try {
-// and run it
+            // Run the query
             f.open();
             while (f.hasNext()) {
                 Tuple tup = f.next();
@@ -26,9 +27,8 @@ public class ScanQuery {
             f.close();
             Database.getBufferPool().transactionComplete(tid);
         } catch (Exception e) {
-            10D BSys 2024 - 2025
-            Lab 2 - SimpleDB
-            System.out.println("Exception : " + e);
+            System.out.println("Exception: " + e);
         }
     }
+
 }
