@@ -6,6 +6,7 @@ IMPORTANT STEPS IN IMPLEMENTATION
         in the getChildren() method, we assume only one child, what if there are more children, how would it be possible?
         Do we need to handle cases in which we have more than one child? How do we implement all the previous methods?
         So far I simply assumed that we have only one child, if we have more we throw an exeption.
+        --PREOBLEM--> needed to open the operator with super.open(), not specified in the requirements.
 4) Join--> 
         -in getJoinField1Name and getJoinField2Name simply add t1 and t2 to identify the table
 

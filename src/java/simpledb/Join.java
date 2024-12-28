@@ -75,9 +75,9 @@ public class Join extends Operator {
             // use the getJoinField1Name() method to get the field name of the join field
             if (p.getField1() == i) {
                 fieldNames[i] = this.getJoinField1Name();
+            } else {
+                fieldNames[i] = td1.getFieldName(i);
             }
-
-            fieldNames[i] = td1.getFieldName(i);
         }
 
         for (int i = 0; i < td2.numFields(); i++) {
@@ -86,9 +86,10 @@ public class Join extends Operator {
             // use the getJoinField2Name() method to get the field name of the join field
             if (p.getField2() == i) {
                 fieldNames[i] = this.getJoinField2Name();
-            }
+            } else {
 
-            fieldNames[i + td1.numFields()] = td2.getFieldName(i);
+                fieldNames[i + td1.numFields()] = td2.getFieldName(i);
+            }
         }
 
         return new TupleDesc(types, fieldNames);
@@ -97,12 +98,14 @@ public class Join extends Operator {
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         // some code goes here
+        super.open();
         this.child1.open();
         this.child2.open();
     }
 
     public void close() {
         // some code goes here
+        super.close();
         this.child1.close();
         this.child2.close();
     }
