@@ -1,0 +1,33 @@
+IMPORTANT STEPS IN IMPLEMENTATION
+
+1)Predicate--> ok
+2)JoinPredicate-->ok, implemented basic join, maybe we need to improve it
+3)Filter--> 
+        in the getChildren() method, we assume only one child, what if there are more children, how would it be possible?
+        Do we need to handle cases in which we have more than one child? How do we implement all the previous methods?
+        So far I simply assumed that we have only one child, if we have more we throw an exeption.
+4) Join--> 
+        -in getJoinField1Name and getJoinField2Name simply add t1 and t2 to identify the table
+
+        -in getTupleDesc() simply rewrite the method of merge() tupleDesc. 
+         We need to create a new structure considering all the fields of both the tables.
+         We assume that all the fields have different names except the joint field. 
+         Use name defined before for the join fields(that are the only ones with same names);
+
+         -fetchNext() --> implemented a basic nested loop join. 
+                          In order to improve performances, the outer loop is done on the smallest table(seen at lesson).
+                          defined a new tuple desc using the previuosly defined method.
+                          For example, if one tuple is {1,2,3} and the other tuple is {1,5,6},
+                          joined on equality of the first column, then this returns {t1.1,2,3,t2.1,5,6}.
+                          No projection implemented yet, we keep both the fields. 
+
+        -setChildren()--> exprected exactly two children, throw an exeption if more or less than 2.
+
+
+
+
+
+        
+
+
+
