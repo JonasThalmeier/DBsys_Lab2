@@ -8,41 +8,50 @@ import java.util.*;
 public class Filter extends Operator {
 
     private static final long serialVersionUID = 1L;
+    private Predicate p;
+    private OpIterator child;
 
     /**
      * Constructor accepts a predicate to apply and a child operator to read
      * tuples to filter from.
      * 
      * @param p
-     *            The predicate to filter tuples with
+     *              The predicate to filter tuples with
      * @param child
-     *            The child operator
+     *              The child operator
      */
     public Filter(Predicate p, OpIterator child) {
         // some code goes here
+        this.p = p;
+        this.child = child;
     }
 
     public Predicate getPredicate() {
         // some code goes here
-        return null;
+        return this.p;
     }
 
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return this.child.getTupleDesc();
+
     }
 
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         // some code goes here
+        this.child.open();
+
     }
 
     public void close() {
         // some code goes here
+        this.child.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
+        this.child.rewind();
     }
 
     /**
@@ -57,18 +66,39 @@ public class Filter extends Operator {
     protected Tuple fetchNext() throws NoSuchElementException,
             TransactionAbortedException, DbException {
         // some code goes here
+
+        while (this.child.hasNext()) {
+            // get the next tuple
+            Tuple t = this.child.next();
+            // check if the tuple satisfies the predicate
+            if (this.p.filter(t)) {
+                return t; // return the tuple, if not continue the loop until we find a tuple that
+                          // satisfies the predicate
+            }
+
+        }
+        // if we reach here, it means there are no more tuples that satisfy the
+        // predicate
         return null;
     }
 
     @Override
     public OpIterator[] getChildren() {
         // some code goes here
-        return null;
+        return new OpIterator[] { this.child }; // assume only one child?
     }
 
     @Override
     public void setChildren(OpIterator[] children) {
         // some code goes here
+
+        // if more than one child, throw exception ( is it correct?)
+        if (children.length != 1) {
+            throw new IllegalArgumentException("Filter operator only accepts one child");
+        }
+
+        this.child = children[0];
+
     }
 
 }
