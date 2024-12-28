@@ -105,7 +105,7 @@ public class Predicate implements Serializable {
     public boolean filter(Tuple t) {
         // some code goes here
 
-        Field fieldToCheck = t.getField(1); // get the field to check of the tuple t
+        Field fieldToCheck = t.getField(this.field); // get the field to check of the tuple t
 
         // compare the field with the operand using the operator, use compare method
         // defined in Field class
