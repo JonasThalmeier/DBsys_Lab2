@@ -1,11 +1,23 @@
 package simpledb;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Knows how to compute some aggregate over a set of StringFields.
  */
 public class StringAggregator implements Aggregator {
 
     private static final long serialVersionUID = 1L;
+
+    private int gbfield; // Group-by field index
+    private Type gbfieldtype; // Type of the group-by field
+    private int afield; // Aggregate field index
+    private Op what; // Aggregation operator (only supports COUNT)
+    private Map<Field, Integer> groups; // Map to store group keys and their counts
+
 
     /**
      * Aggregate constructor
@@ -18,6 +30,14 @@ public class StringAggregator implements Aggregator {
 
     public StringAggregator(int gbfield, Type gbfieldtype, int afield, Op what) {
         // some code goes here
+        if (what != Op.COUNT) {
+            throw new IllegalArgumentException("StringAggregator only supports COUNT");
+        }
+        this.gbfield = gbfield;
+        this.gbfieldtype = gbfieldtype;
+        this.afield = afield;
+        this.what = what;
+        this.groups = new HashMap<>(); // Initialize the map to track counts
     }
 
     /**
@@ -26,6 +46,10 @@ public class StringAggregator implements Aggregator {
      */
     public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
+        Field groupKey = (gbfield == Aggregator.NO_GROUPING) ? null : tup.getField(gbfield);
+
+        // Increment the count for this groupKey
+        groups.put(groupKey, groups.getOrDefault(groupKey, 0) + 1);
     }
 
     /**
@@ -38,7 +62,30 @@ public class StringAggregator implements Aggregator {
      */
     public OpIterator iterator() {
         // some code goes here
-        throw new UnsupportedOperationException("please implement me for lab2");
+        List<Tuple> results = new ArrayList<>();
+        TupleDesc td;
+
+        // Define the output schema based on whether there is grouping
+        if (gbfield == Aggregator.NO_GROUPING) {
+            td = new TupleDesc(new Type[]{Type.INT_TYPE});
+        } else {
+            td = new TupleDesc(new Type[]{gbfieldtype, Type.INT_TYPE});
+        }
+
+        // Build result tuples from the groups map
+        for (Map.Entry<Field, Integer> entry : groups.entrySet()) {
+            Tuple t = new Tuple(td);
+            if (gbfield == Aggregator.NO_GROUPING) {
+                t.setField(0, new IntField(entry.getValue()));
+            } else {
+                t.setField(0, entry.getKey());
+                t.setField(1, new IntField(entry.getValue()));
+            }
+            results.add(t);
+        }
+
+        // Return an OpIterator over the results
+        return new TupleIterator(td, results);
     }
 
 }
