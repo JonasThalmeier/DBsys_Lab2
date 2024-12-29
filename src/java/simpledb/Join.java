@@ -11,6 +11,8 @@ public class Join extends Operator {
     private JoinPredicate p;
     private OpIterator child1;
     private OpIterator child2;
+    private Tuple t1;
+    private Tuple t2;
 
     /**
      * Constructor. Accepts two children to join and the predicate to join them
@@ -77,7 +79,7 @@ public class Join extends Operator {
             } else {
                 fieldNames[i] = td1.getFieldName(i);
             }
-            //fieldNames[i] = td1.getFieldName(i);
+            // fieldNames[i] = td1.getFieldName(i);
         }
 
         for (int i = 0; i < td2.numFields(); i++) {
@@ -90,7 +92,7 @@ public class Join extends Operator {
 
                 fieldNames[i + td1.numFields()] = td2.getFieldName(i);
             }
-            //fieldNames[i + td1.numFields()] = td2.getFieldName(i);
+            // fieldNames[i + td1.numFields()] = td2.getFieldName(i);
         }
 
         return new TupleDesc(types, fieldNames);
@@ -137,21 +139,46 @@ public class Join extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
-        while (this.child1.hasNext()) {
-            Tuple t1 = this.child1.next();
-            while (this.child2.hasNext()) {
-                Tuple t2 = this.child2.next();
 
+        // if t1 is not null, we simply look for a match with the second child.
+        if (this.t1 == null && this.child1.hasNext()) {
+            this.t1 = this.child1.next();
+        }
+
+        // iterate over the tuples of the second child
+        while (this.child2.hasNext()) {
+            this.t2 = this.child2.next();
+            // check if the two tuples satisfy the join predicate
+            if (this.p.filter(t1, t2)) {
+                // get a new tuple desc, as defined in the getTupleDesc() method
+                TupleDesc td = this.getTupleDesc();
+                // create a new tuple
+                Tuple t = new Tuple(td);
+                // fill the new tuple with the fields of the two tuples
+                // iterate over the fields of the first tuple, add them to the new tuple
+                for (int i = 0; i < t1.getTupleDesc().numFields(); i++) {
+                    t.setField(i, t1.getField(i));
+                }
+                // iterate over the fields of the second tuple, add them to the new tuple
+                for (int i = 0; i < t2.getTupleDesc().numFields(); i++) {
+                    t.setField(i + t1.getTupleDesc().numFields(), t2.getField(i));
+                }
+                return t;
+            }
+        }
+        // if we reach here, we need to move to the next tuple of child 1
+        while (this.child2.hasNext()) {
+            this.t1 = this.child1.next();
+            this.child2.rewind();
+            while (this.child2.hasNext()) {
+                this.t2 = this.child2.next();
                 // check if the two tuples satisfy the join predicate
                 if (this.p.filter(t1, t2)) {
                     // get a new tuple desc, as defined in the getTupleDesc() method
                     TupleDesc td = this.getTupleDesc();
-
                     // create a new tuple
                     Tuple t = new Tuple(td);
-
                     // fill the new tuple with the fields of the two tuples
-
                     // iterate over the fields of the first tuple, add them to the new tuple
                     for (int i = 0; i < t1.getTupleDesc().numFields(); i++) {
                         t.setField(i, t1.getField(i));
@@ -163,11 +190,9 @@ public class Join extends Operator {
                     return t;
                 }
             }
-            this.child2.rewind();
         }
         // if we reach here, it means there are no more tuples that satisfy the join
-        // predicate
-        
+        // predicate, so we return null
         return null;
     }
 
