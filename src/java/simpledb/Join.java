@@ -28,7 +28,6 @@ public class Join extends Operator {
         this.p = p;
         this.child1 = child1;
         this.child2 = child2;
-
     }
 
     public JoinPredicate getJoinPredicate() {
@@ -78,6 +77,7 @@ public class Join extends Operator {
             } else {
                 fieldNames[i] = td1.getFieldName(i);
             }
+            //fieldNames[i] = td1.getFieldName(i);
         }
 
         for (int i = 0; i < td2.numFields(); i++) {
@@ -85,11 +85,12 @@ public class Join extends Operator {
 
             // use the getJoinField2Name() method to get the field name of the join field
             if (p.getField2() == i) {
-                fieldNames[i] = this.getJoinField2Name();
+                fieldNames[i + td1.numFields()] = this.getJoinField2Name();
             } else {
 
                 fieldNames[i + td1.numFields()] = td2.getFieldName(i);
             }
+            //fieldNames[i + td1.numFields()] = td2.getFieldName(i);
         }
 
         return new TupleDesc(types, fieldNames);
@@ -159,15 +160,14 @@ public class Join extends Operator {
                     for (int i = 0; i < t2.getTupleDesc().numFields(); i++) {
                         t.setField(i + t1.getTupleDesc().numFields(), t2.getField(i));
                     }
-
                     return t;
                 }
-
             }
-
+            this.child2.rewind();
         }
         // if we reach here, it means there are no more tuples that satisfy the join
         // predicate
+        
         return null;
     }
 
