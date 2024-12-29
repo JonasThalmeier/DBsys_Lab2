@@ -36,6 +36,11 @@ IMPORTANT STEPS IN IMPLEMENTATION
 
 
 
+EXERCISE3
+1) HeapPage--> everything ok, used a mask to mark the slot as full/empty: 
+                        header[byteIndex] &= ~(1 << bitOffset); --> create a byte with all ones but on the desired position, apply AND operator with  (mark the slot as 0)
+                        header[byteIndex] != (1 << bitOffset); -->create a byte with 1 on the desired position, apply OR operator (mark the slot as 1)
+
         
 
 
