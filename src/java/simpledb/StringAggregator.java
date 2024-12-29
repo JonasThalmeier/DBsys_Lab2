@@ -16,7 +16,8 @@ public class StringAggregator implements Aggregator {
     private Type gbfieldtype; // Type of the group-by field
     private int afield; // Aggregate field index
     private Op what; // Aggregation operator (only supports COUNT)
-    private Map<Field, Integer> groups; // Map to store group keys and their counts
+    private Map<Field, Integer> groupsInt; // For COUNT
+    private Map<Field, String> groupsString;   // For MIN and MAX
 
 
     /**
@@ -30,14 +31,19 @@ public class StringAggregator implements Aggregator {
 
     public StringAggregator(int gbfield, Type gbfieldtype, int afield, Op what) {
         // some code goes here
-        if (what != Op.COUNT) {
-            throw new IllegalArgumentException("StringAggregator only supports COUNT");
+        if (what != Op.COUNT && what != Op.MIN && what != Op.MAX) {
+            throw new IllegalArgumentException("StringAggregator only supports COUNT, MIN, and MAX");
         }
         this.gbfield = gbfield;
         this.gbfieldtype = gbfieldtype;
         this.afield = afield;
         this.what = what;
-        this.groups = new HashMap<>(); // Initialize the map to track counts
+        // Initialize maps based on the operation
+        if (what == Op.COUNT) {
+            groupsInt = new HashMap<>();
+        } else{
+            groupsString = new HashMap<>();
+        }
     }
 
     /**
@@ -47,9 +53,22 @@ public class StringAggregator implements Aggregator {
     public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
         Field groupKey = (gbfield == Aggregator.NO_GROUPING) ? null : tup.getField(gbfield);
+        String value = ((StringField) tup.getField(afield)).getValue();
 
-        // Increment the count for this groupKey
-        groups.put(groupKey, groups.getOrDefault(groupKey, 0) + 1);
+        if (what == Op.COUNT) {
+            // Increment the count for this group key
+            groupsInt.put(groupKey, groupsInt.getOrDefault(groupKey, 0) + 1);
+        } else if (what == Op.MIN) {
+            // Update the minimum for this group key
+            groupsString.put(groupKey, groupsString.containsKey(groupKey)
+                    ? (value.compareTo(groupsString.get(groupKey)) < 0 ? value : groupsString.get(groupKey))
+                    : value);
+        } else if (what == Op.MAX) {
+            // Update the maximum for this group key
+            groupsString.put(groupKey, groupsString.containsKey(groupKey)
+                    ? (value.compareTo(groupsString.get(groupKey)) > 0 ? value : groupsString.get(groupKey))
+                    : value);
+        }
     }
 
     /**
@@ -65,27 +84,49 @@ public class StringAggregator implements Aggregator {
         List<Tuple> results = new ArrayList<>();
         TupleDesc td;
 
-        // Define the output schema based on whether there is grouping
-        if (gbfield == Aggregator.NO_GROUPING) {
-            td = new TupleDesc(new Type[]{Type.INT_TYPE});
-        } else {
-            td = new TupleDesc(new Type[]{gbfieldtype, Type.INT_TYPE});
-        }
-
-        // Build result tuples from the groups map
-        for (Map.Entry<Field, Integer> entry : groups.entrySet()) {
-            Tuple t = new Tuple(td);
+        // Define the output schema based on the operation
+        if (what == Op.COUNT) {
+            // COUNT produces an integer result
             if (gbfield == Aggregator.NO_GROUPING) {
-                t.setField(0, new IntField(entry.getValue()));
+                td = new TupleDesc(new Type[]{Type.INT_TYPE}); // Single integer field for COUNT
             } else {
-                t.setField(0, entry.getKey());
-                t.setField(1, new IntField(entry.getValue()));
+                td = new TupleDesc(new Type[]{gbfieldtype, Type.INT_TYPE}); // Grouping key + COUNT result
             }
-            results.add(t);
+        } else {
+            // MIN and MAX produce string results
+            if (gbfield == Aggregator.NO_GROUPING) {
+                td = new TupleDesc(new Type[]{Type.STRING_TYPE}); // Single string field for MIN/MAX
+            } else {
+                td = new TupleDesc(new Type[]{gbfieldtype, Type.STRING_TYPE}); // Grouping key + MIN/MAX result
+            }
         }
 
-        // Return an OpIterator over the results
+        // Populate results based on the operation
+        if (what == Op.COUNT) {
+            for (Map.Entry<Field, Integer> entry : groupsInt.entrySet()) {
+                Tuple t = new Tuple(td);
+                if (gbfield == Aggregator.NO_GROUPING) {
+                    t.setField(0, new IntField(entry.getValue())); // COUNT result as IntField
+                } else {
+                    t.setField(0, entry.getKey()); // Grouping key
+                    t.setField(1, new IntField(entry.getValue())); // COUNT result as IntField
+                }
+                results.add(t);
+            }
+        } else { // MIN or MAX
+            for (Map.Entry<Field, String> entry : groupsString.entrySet()) {
+                Tuple t = new Tuple(td);
+                if (gbfield == Aggregator.NO_GROUPING) {
+                    t.setField(0, new StringField(entry.getValue(), Type.STRING_TYPE.getLen())); // MIN/MAX result as StringField
+                } else {
+                    t.setField(0, entry.getKey()); // Grouping key
+                    t.setField(1, new StringField(entry.getValue(), Type.STRING_TYPE.getLen())); // MIN/MAX result as StringField
+                }
+                results.add(t);
+            }
+        }
+
         return new TupleIterator(td, results);
     }
-
 }
+
