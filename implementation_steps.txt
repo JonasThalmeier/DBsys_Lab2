@@ -24,7 +24,15 @@ IMPORTANT STEPS IN IMPLEMENTATION
 
         -setChildren()--> exprected exactly two children, throw an exeption if more or less than 2.
 
-
+		--fetchNext()--> need to create global variables t1 and t2. 
+						 Problems were caused by the way the original version was defined. 
+						 Each time we called fetchNext(), originally, the next tuple of child1 was automatically retrieved, 
+						 without checking if there was a match with the same tuple of child 1 and the next tuple of child 2. 
+						 For this reason i decided to:
+						 1) check if t1 is already initialized
+						 2)if yes, search a metch wit the REMAINING t2s.
+						 3) if no match, go to the next t1 and unwind t2( start from the begnning again)
+						 4) proceed like this until e ìfind a match, or we end all the possible combinations  
 
 
 

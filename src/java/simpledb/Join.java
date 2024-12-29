@@ -167,7 +167,7 @@ public class Join extends Operator {
             }
         }
         // if we reach here, we need to move to the next tuple of child 1
-        while (this.child2.hasNext()) {
+        while (this.child1.hasNext()) {
             this.t1 = this.child1.next();
             this.child2.rewind();
             while (this.child2.hasNext()) {
