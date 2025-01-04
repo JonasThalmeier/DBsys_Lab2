@@ -155,9 +155,15 @@ public class BufferPool {
         HeapFile table = (HeapFile) Database.getCatalog().getDatabaseFile(tableId);
         ArrayList<Page> modifiedPages = table.insertTuple(tid, t);
 
+        // DEBUGGING
+        System.out.println("Modified pages count: " + modifiedPages.size());
+
         for (Page page : modifiedPages) {
             page.markDirty(true, tid);
             bufferpool.put(page.getId(), page); // Replace any existing cached version
+
+            // DEBUGGING
+            System.out.println("Marking page dirty: " + page.getId());
         }
     }
 

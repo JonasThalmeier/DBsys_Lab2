@@ -37,6 +37,10 @@ public class HeapFile implements DbFile {
         this.f = f;
         this.td = td;
         this.numPages = 0;
+        /* this.numPages = (int) (this.f.length() / DEFAULT_PAGE_SIZE);
+        if (this.f.length() % DEFAULT_PAGE_SIZE != 0) {
+            this.numPages++;
+        }*/
 
     }
 
@@ -114,19 +118,12 @@ public class HeapFile implements DbFile {
      */
     public int numPages() {
         // some code goes here
-
-        // get the file length
         long fileSize = this.f.length();
-
-        // get the number of pages needed according to the page size
-        int numPages = (int) (fileSize / this.DEFAULT_PAGE_SIZE);
-
-        // check if there is some page that is not full
-        if ((fileSize % this.DEFAULT_PAGE_SIZE) != 0) {
-            numPages++;
+        int calculatedPages = (int) (fileSize / DEFAULT_PAGE_SIZE);
+        if (fileSize % DEFAULT_PAGE_SIZE != 0) {
+            calculatedPages++;
         }
-
-        return numPages;
+        return Math.max(this.numPages, calculatedPages);
     }
 
     // see DbFile.java for javadocs
@@ -137,8 +134,14 @@ public class HeapFile implements DbFile {
 
         ArrayList<Page> modifiedPages = new ArrayList<>();
 
+        // Debug: Log the number of pages
+        System.out.println("Number of pages in file: " + this.numPages);
+
         for (int i = 0; i < this.numPages; i++) {
             HeapPageId pid = new HeapPageId(this.getId(), i);
+
+            // Debug: Log the page being checked
+            System.out.println("Checking page: " + pid);
 
             // access the page from the buffer pool
             HeapPage page = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
@@ -146,6 +149,11 @@ public class HeapFile implements DbFile {
             // check if there is space in the page, if so insert the tuple
             if (page.getNumEmptySlots() > 0) {
                 page.insertTuple(t);
+
+                // Debug: Log tuple insertion and updated empty slots
+                System.out.println("Inserting tuple into page: " + pid);
+                System.out.println("Page " + pid + " empty slots after insertion: " + page.getNumEmptySlots());
+
                 modifiedPages.add(page);
                 return modifiedPages;
             }
@@ -153,12 +161,26 @@ public class HeapFile implements DbFile {
 
         // if there is no space in the pages, create a new page and insert the tuple
         HeapPageId pid = new HeapPageId(this.getId(), this.numPages);
+        // Debug: Log new page creation
+        System.out.println("Creating a new page with ID: " + pid);
         HeapPage newPage = new HeapPage(pid, HeapPage.createEmptyPageData());
 
         // insert the tuple into the new page
         newPage.insertTuple(t);
+        // Debug: Log tuple insertion in the new page
+        System.out.println("Inserting tuple into new page: " + pid);
+        System.out.println("New page empty slots after insertion: " + newPage.getNumEmptySlots());
+
         modifiedPages.add(newPage);
 
+        // Increment numPages to reflect the new page
+        this.numPages++;
+
+        // Debug: Log the modified pages before returning
+        System.out.println("Modified pages: ");
+        for (Page modifiedPage : modifiedPages) {
+            System.out.println(modifiedPage.getId());
+        }
         return modifiedPages;
     }
 
