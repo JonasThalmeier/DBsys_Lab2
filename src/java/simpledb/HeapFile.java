@@ -160,18 +160,18 @@ public class HeapFile implements DbFile {
         }
 
         // if there is no space in the pages, create a new page and insert the tuple
-        HeapPageId pid = new HeapPageId(this.getId(), this.numPages);
+        //HeapPageId pid = new HeapPageId(this.getId(), this.numPages);
         // Debug: Log new page creation
-        System.out.println("Creating a new page with ID: " + pid);
-        HeapPage newPage = new HeapPage(pid, HeapPage.createEmptyPageData());
+        //System.out.println("Creating a new page with ID: " + pid);
+        //HeapPage newPage = new HeapPage(pid, HeapPage.createEmptyPageData());
 
         // insert the tuple into the new page
-        newPage.insertTuple(t);
+        //newPage.insertTuple(t);
         // Debug: Log tuple insertion in the new page
-        System.out.println("Inserting tuple into new page: " + pid);
-        System.out.println("New page empty slots after insertion: " + newPage.getNumEmptySlots());
+        //System.out.println("Inserting tuple into new page: " + pid);
+        //System.out.println("New page empty slots after insertion: " + newPage.getNumEmptySlots());
 
-        modifiedPages.add(newPage);
+        //modifiedPages.add(newPage);
 
         // Increment numPages to reflect the new page
         this.numPages++;
