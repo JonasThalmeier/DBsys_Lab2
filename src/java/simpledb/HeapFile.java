@@ -176,6 +176,9 @@ public class HeapFile implements DbFile {
         // Increment numPages to reflect the new page
         this.numPages++;
 
+        // Mark the new page as dirty and make it available in the buffer pool
+        Database.getBufferPool().insertTuple(tid, this.getId(), t);
+
         // Debug: Log the modified pages before returning
         System.out.println("Modified pages: ");
         for (Page modifiedPage : modifiedPages) {

@@ -2,6 +2,7 @@ package simpledb;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -74,17 +75,37 @@ public class BufferPool {
         throws TransactionAbortedException, DbException {
         // some code goes here
 
+        // Debug: Log the method call
+        System.out.println("BufferPool.getPage called with PageId: " + pid + ", Permissions: " + perm);
+
         if (bufferpool.containsKey(pid)) {
+            System.out.println("Page found in BufferPool: " + pid);
+            // Debug: Log page state after reading from disk
+            Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
+            if (pageBuffer instanceof HeapPage) {
+                HeapPage heapPage = (HeapPage) pageBuffer;
+                System.out.println("Page in Buffer. Empty slots: " + heapPage.getNumEmptySlots());
+                //System.out.println("Header state: " + Arrays.toString(heapPage.getHeaderBytes()));
+            }
             return bufferpool.get(pid);
         }
 
         if (bufferpool.size() >= numPages) {
+            System.out.println("BufferPool is full. Size: " + bufferpool.size() + ", Capacity: " + numPages);
             throw new DbException("Bufferpool is full");
         }
-
+        System.out.println("Page not found in BufferPool. Loading from disk: " + pid);
         Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
 
+        // Debug: Log page state after reading from disk
+        if (pageBuffer instanceof HeapPage) {
+            HeapPage heapPage = (HeapPage) pageBuffer;
+            System.out.println("Loaded page from disk. Empty slots: " + heapPage.getNumEmptySlots());
+            //System.out.println("Header state: " + Arrays.toString(heapPage.getHeaderBytes()));
+        }
+
         bufferpool.put(pid, pageBuffer);
+        System.out.println("Page added to BufferPool: " + pid);
 
         return pageBuffer;
     }

@@ -312,6 +312,9 @@ public class HeapPage implements Page {
 
                 // update the header
                 this.markSlotUsed(i, true);
+                System.out.println("After insertion:");
+                System.out.println("Empty slots: " + this.getNumEmptySlots());
+                System.out.println("Header state: " + Arrays.toString(header));
 
                 return;
             }
