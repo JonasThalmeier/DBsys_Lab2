@@ -27,6 +27,8 @@ public class Join extends Operator {
      */
     public Join(JoinPredicate p, OpIterator child1, OpIterator child2) {
         // some code goes here
+        // assuming that child1 and child2 are already given considering the smaller
+        // table as outer relation
         this.p = p;
         this.child1 = child1;
         this.child2 = child2;

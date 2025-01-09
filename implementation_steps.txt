@@ -16,7 +16,7 @@ IMPORTANT STEPS IN IMPLEMENTATION
          Use name defined before for the join fields(that are the only ones with same names);
 
          -fetchNext() --> implemented a basic nested loop join. 
-                          In order to improve performances, the outer loop is done on the smallest table(seen at lesson).
+                          In order to improve performances, the outer loop is done on the smallest table(seen at lesson).We make the assumptio that child11 is already the smallest table
                           defined a new tuple desc using the previuosly defined method.
                           For example, if one tuple is {1,2,3} and the other tuple is {1,5,6},
                           joined on equality of the first column, then this returns {t1.1,2,3,t2.1,5,6}.
