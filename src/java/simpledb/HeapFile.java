@@ -160,24 +160,29 @@ public class HeapFile implements DbFile {
         }
 
         // if there is no space in the pages, create a new page and insert the tuple
-        //HeapPageId pid = new HeapPageId(this.getId(), this.numPages);
+        HeapPageId pid = new HeapPageId(this.getId(), this.numPages);
         // Debug: Log new page creation
         //System.out.println("Creating a new page with ID: " + pid);
-        //HeapPage newPage = new HeapPage(pid, HeapPage.createEmptyPageData());
+        
+        //get the page from the buffer, if not in the buffer, read from disk
+        HeapPage newPage = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
 
         // insert the tuple into the new page
-        //newPage.insertTuple(t);
+        newPage.insertTuple(t);
+        
         // Debug: Log tuple insertion in the new page
         //System.out.println("Inserting tuple into new page: " + pid);
         //System.out.println("New page empty slots after insertion: " + newPage.getNumEmptySlots());
 
-        //modifiedPages.add(newPage);
+        //save the page as modified
+        modifiedPages.add(newPage);
+        //mark the page as dirty
 
         // Increment numPages to reflect the new page
         this.numPages++;
 
         // Mark the new page as dirty and make it available in the buffer pool
-        Database.getBufferPool().insertTuple(tid, this.getId(), t);
+        //Database.getBufferPool().insertTuple(tid, this.getId(), t);
 
         // Debug: Log the modified pages before returning
         System.out.println("Modified pages: ");
