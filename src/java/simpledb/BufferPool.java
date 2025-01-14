@@ -81,7 +81,8 @@ public class BufferPool {
         if (bufferpool.containsKey(pid)) {
             System.out.println("Page found in BufferPool: " + pid);
             // Debug: Log page state after reading from disk
-            Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
+            // Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
+            Page pageBuffer = bufferpool.get(pid);
             if (pageBuffer instanceof HeapPage) {
                 HeapPage heapPage = (HeapPage) pageBuffer;
                 System.out.println("Page in Buffer. Empty slots: " + heapPage.getNumEmptySlots());
