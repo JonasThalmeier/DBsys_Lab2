@@ -111,6 +111,29 @@ public class HeapFile implements DbFile {
     public void writePage(Page page) throws IOException {
         // some code goes here
         // not necessary for lab1
+
+        // NOT SURE ABOUT THIS CODE!!!!!!!!!!!!
+
+        // Validate that the page belongs to this HeapFile
+        if (page.getId().getTableId() != this.getId()) {
+            throw new IllegalArgumentException("Page does not belong to this HeapFile.");
+        }
+
+        // Get the page number and calculate the offset in the file
+        int pageNumber = page.getId().getPageNumber();
+        int offset = pageNumber * DEFAULT_PAGE_SIZE;
+
+        // Write the page data to the file
+        try (RandomAccessFile raf = new RandomAccessFile(f, "rw")) {
+            // Seek to the correct position
+            raf.seek(offset);
+
+            // Get the page data
+            byte[] pageData = page.getPageData();
+
+            // Write the data to the file
+            raf.write(pageData);
+        }
     }
 
     /**

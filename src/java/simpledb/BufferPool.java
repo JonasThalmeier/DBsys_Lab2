@@ -3,6 +3,8 @@ package simpledb;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -93,7 +95,8 @@ public class BufferPool {
 
         if (bufferpool.size() >= numPages) {
             System.out.println("BufferPool is full. Size: " + bufferpool.size() + ", Capacity: " + numPages);
-            throw new DbException("Bufferpool is full");
+            //throw new DbException("Bufferpool is full");
+            this.evictPage();
         }
         System.out.println("Page not found in BufferPool. Loading from disk: " + pid);
         Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
@@ -222,6 +225,13 @@ public class BufferPool {
     public synchronized void flushAllPages() throws IOException {
         // some code goes here
         // not necessary for lab1
+        // Iterate through all pages in the buffer pool
+        for (PageId pid : bufferpool.keySet()) {
+            // Flush each page
+            flushPage(pid);
+        }
+        // Debugging: Log the flush operation
+        System.out.println("Flushed all dirty pages to disk.");
 
     }
 
@@ -236,6 +246,7 @@ public class BufferPool {
     public synchronized void discardPage(PageId pid) {
         // some code goes here
         // not necessary for lab1
+        bufferpool.remove(pid);
     }
 
     /**
@@ -245,6 +256,28 @@ public class BufferPool {
     private synchronized  void flushPage(PageId pid) throws IOException {
         // some code goes here
         // not necessary for lab1
+        // Check if the page is in the buffer pool
+        Page page = bufferpool.get(pid);
+        if (page == null) {
+            throw new IOException("Page not found in the buffer pool: " + pid);
+        }
+
+        // Check if the page is dirty
+        TransactionId dirtier = page.isDirty();
+        if (dirtier == null) {
+            // If the page is not dirty, no need to write it back to disk
+            return;
+        }
+
+        // Write the page data to disk
+        DbFile dbFile = Database.getCatalog().getDatabaseFile(pid.getTableId());
+        dbFile.writePage(page);
+
+        // Mark the page as clean
+        page.markDirty(false, null);
+
+        // Debugging: Log the flush operation
+        System.out.println("Flushed page " + pid + " to disk.");
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -252,6 +285,19 @@ public class BufferPool {
     public synchronized  void flushPages(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
+        // Iterate through all pages in the buffer pool
+        for (PageId pid : bufferpool.keySet()) {
+            Page page = bufferpool.get(pid);
+
+            // Check if the page is dirty and whether the given transaction dirtied it
+            if (page != null && tid.equals(page.isDirty())) {
+                // Flush the dirty page to disk
+                flushPage(pid);
+            }
+        }
+
+        // Debugging: Log the flush operation
+        System.out.println("Flushed all pages for transaction: " + tid);
     }
 
     /**
@@ -261,6 +307,26 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for lab1
+        if (bufferpool.isEmpty()) {
+            throw new DbException("BufferPool is empty; no page to evict.");
+        }
+
+        // Get a random page ID from the buffer pool
+        List<PageId> pageIds = new ArrayList<>(bufferpool.keySet());
+        PageId evictCandidate = pageIds.get(new Random().nextInt(pageIds.size()));
+
+        try {
+            // Flush the page if it is dirty
+            flushPage(evictCandidate);
+        } catch (IOException e) {
+            throw new DbException("Error flushing page during eviction: " + e.getMessage());
+        }
+
+        // Remove the page from the buffer pool
+        bufferpool.remove(evictCandidate);
+
+        // Debugging: Log the eviction
+        System.out.println("Evicted page: " + evictCandidate);
     }
 
 }
