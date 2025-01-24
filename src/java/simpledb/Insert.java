@@ -19,19 +19,19 @@ public class Insert extends Operator {
      * Constructor.
      *
      * @param t
-     *            The transaction running the insert.
+     *                The transaction running the insert.
      * @param child
-     *            The child operator from which to read tuples to be inserted.
+     *                The child operator from which to read tuples to be inserted.
      * @param tableId
-     *            The table in which to insert tuples.
+     *                The table in which to insert tuples.
      * @throws DbException
-     *             if TupleDesc of child differs from table into which we are to
-     *             insert.
+     *                     if TupleDesc of child differs from table into which we
+     *                     are to
+     *                     insert.
      */
     public Insert(TransactionId t, OpIterator child, int tableId)
             throws DbException {
         // some code goes here
-
         this.transactionId = t;
         this.child = child;
         this.tableId = tableId;
@@ -44,7 +44,7 @@ public class Insert extends Operator {
 
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return new TupleDesc(new Type[]{Type.INT_TYPE});
+        return new TupleDesc(new Type[] { Type.INT_TYPE });
     }
 
     public void open() throws DbException, TransactionAbortedException {
@@ -82,13 +82,15 @@ public class Insert extends Operator {
         int count = 0;
         BufferPool bufferpool = Database.getBufferPool();
 
-        if(inserted == true){
+        // if already inserted, do nothing
+        if (inserted == true) {
             return null;
         }
 
-        inserted= true;
+        inserted = true;
 
-        while(child.hasNext()){
+        // iterate over all the elements to be inserted
+        while (child.hasNext()) {
             Tuple tuple = child.next();
             try {
                 bufferpool.insertTuple(transactionId, tableId, tuple);
@@ -98,6 +100,7 @@ public class Insert extends Operator {
             }
         }
 
+        // store and return the number of inserted tuple
         Tuple insertcount = new Tuple(getTupleDesc());
         insertcount.setField(0, new IntField(count));
 
@@ -107,7 +110,7 @@ public class Insert extends Operator {
     @Override
     public OpIterator[] getChildren() {
         // some code goes here
-        return new OpIterator[]{child};
+        return new OpIterator[] { child };
     }
 
     @Override

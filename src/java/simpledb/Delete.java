@@ -17,13 +17,12 @@ public class Delete extends Operator {
      * well as the child to read from.
      * 
      * @param t
-     *            The transaction this delete runs in
+     *              The transaction this delete runs in
      * @param child
-     *            The child operator from which to read tuples for deletion
+     *              The child operator from which to read tuples for deletion
      */
     public Delete(TransactionId t, OpIterator child) {
         // some code goes here
-
         this.t = t;
         this.child = child;
         this.deleted = false;
@@ -31,7 +30,7 @@ public class Delete extends Operator {
 
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return new TupleDesc(new Type[]{Type.INT_TYPE});
+        return new TupleDesc(new Type[] { Type.INT_TYPE });
     }
 
     public void open() throws DbException, TransactionAbortedException {
@@ -65,12 +64,14 @@ public class Delete extends Operator {
         int count = 0;
         BufferPool bufferpool = Database.getBufferPool();
 
+        // if already deleted, do nothing
         if (deleted == true) {
             return null;
         }
 
         deleted = true;
 
+        // iterate over all the tuples to delete
         while (child.hasNext()) {
             Tuple tuple = child.next();
             try {
@@ -81,6 +82,7 @@ public class Delete extends Operator {
             }
         }
 
+        // store and return the numbe rof deleted tuples
         Tuple tuplecount = new Tuple(getTupleDesc());
         tuplecount.setField(0, new IntField(count));
 
@@ -90,7 +92,7 @@ public class Delete extends Operator {
     @Override
     public OpIterator[] getChildren() {
         // some code goes here
-        return new OpIterator[]{child};
+        return new OpIterator[] { child };
     }
 
     @Override
