@@ -94,7 +94,7 @@ public class Filter extends Operator {
     public void setChildren(OpIterator[] children) {
         // some code goes here
 
-        // if more than one child, throw exception ( is it correct?)
+        // if more than one child, throw exception (we assume only one child)
         if (children.length != 1) {
             throw new IllegalArgumentException("Filter operator only accepts one child");
         }

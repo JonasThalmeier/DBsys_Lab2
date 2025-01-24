@@ -27,8 +27,8 @@ public class Join extends Operator {
      */
     public Join(JoinPredicate p, OpIterator child1, OpIterator child2) {
         // some code goes here
-        // assuming that child1 and child2 are already given considering the smaller
-        // table as outer relation
+
+        // assuming that child1 is already given as the smaller relation (outer one)
         this.p = p;
         this.child1 = child1;
         this.child2 = child2;
@@ -65,6 +65,7 @@ public class Join extends Operator {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
+
         TupleDesc td1 = this.child1.getTupleDesc();
         TupleDesc td2 = this.child2.getTupleDesc();
         int totalFields = td1.numFields() + td2.numFields();
@@ -73,28 +74,30 @@ public class Join extends Operator {
         String[] fieldNames = new String[totalFields];
 
         for (int i = 0; i < td1.numFields(); i++) {
+            // add the field type of field i of first child
             types[i] = td1.getFieldType(i);
 
-            // use the getJoinField1Name() method to get the field name of the join field
+            // if join field, use the getJoinField1Name() method to get the field name of
+            // the join field
             if (p.getField1() == i) {
                 fieldNames[i] = this.getJoinField1Name();
             } else {
                 fieldNames[i] = td1.getFieldName(i);
             }
-            // fieldNames[i] = td1.getFieldName(i);
         }
 
         for (int i = 0; i < td2.numFields(); i++) {
+            // add the field type of field i of second child
             types[i + td1.numFields()] = td2.getFieldType(i);
 
-            // use the getJoinField2Name() method to get the field name of the join field
+            // if join field,use the getJoinField2Name() method to get the field name of the
+            // join field
             if (p.getField2() == i) {
                 fieldNames[i + td1.numFields()] = this.getJoinField2Name();
             } else {
 
                 fieldNames[i + td1.numFields()] = td2.getFieldName(i);
             }
-            // fieldNames[i + td1.numFields()] = td2.getFieldName(i);
         }
 
         return new TupleDesc(types, fieldNames);
@@ -103,6 +106,8 @@ public class Join extends Operator {
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         // some code goes here
+
+        // open all the children
         super.open();
         this.child1.open();
         this.child2.open();
@@ -110,6 +115,8 @@ public class Join extends Operator {
 
     public void close() {
         // some code goes here
+
+        // close all the children
         super.close();
         this.child1.close();
         this.child2.close();
@@ -117,6 +124,8 @@ public class Join extends Operator {
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
+
+        // rewind all the children
         this.child1.rewind();
         this.child2.rewind();
     }
@@ -142,7 +151,8 @@ public class Join extends Operator {
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
 
-        // if t1 is not null, we simply look for a match with the second child.
+        // if t1 is not null,get the next child. If already initialized, simply move to
+        // the next step.
         if (this.t1 == null && this.child1.hasNext()) {
             this.t1 = this.child1.next();
         }
@@ -168,7 +178,8 @@ public class Join extends Operator {
                 return t;
             }
         }
-        // if we reach here, we need to move to the next tuple of child 1
+        // if we reach here, we need to move to the next tuple of child 1,since no match
+        // has been found
         while (this.child1.hasNext()) {
             this.t1 = this.child1.next();
             this.child2.rewind();
@@ -208,12 +219,13 @@ public class Join extends Operator {
     @Override
     public void setChildren(OpIterator[] children) {
         // some code goes here
+        // check if the number of children is exactly 2, if not throw an exception
+        // (assume join only between two tables)
         if (children.length != 2) {
             throw new IllegalArgumentException("Join operator requires exactly two children.");
         }
 
         // Set the children to the corresponding child operators
-
         this.child1 = children[0];
         this.child2 = children[1];
     }

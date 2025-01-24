@@ -60,7 +60,6 @@ public class Predicate implements Serializable {
      */
     public Predicate(int field, Op op, Field operand) {
         // some code goes here
-
         this.field = field;
         this.op = op;
         this.operand = operand;
