@@ -37,10 +37,12 @@ public class HeapFile implements DbFile {
         this.f = f;
         this.td = td;
         this.numPages = 0;
-        /* this.numPages = (int) (this.f.length() / DEFAULT_PAGE_SIZE);
-        if (this.f.length() % DEFAULT_PAGE_SIZE != 0) {
-            this.numPages++;
-        }*/
+        /*
+         * this.numPages = (int) (this.f.length() / DEFAULT_PAGE_SIZE);
+         * if (this.f.length() % DEFAULT_PAGE_SIZE != 0) {
+         * this.numPages++;
+         * }
+         */
 
     }
 
@@ -112,9 +114,7 @@ public class HeapFile implements DbFile {
         // some code goes here
         // not necessary for lab1
 
-        // NOT SURE ABOUT THIS CODE!!!!!!!!!!!!
-
-        // Validate that the page belongs to this HeapFile
+        // Validate that the page belongs to this HeapFile, if not, exception
         if (page.getId().getTableId() != this.getId()) {
             throw new IllegalArgumentException("Page does not belong to this HeapFile.");
         }
@@ -158,7 +158,7 @@ public class HeapFile implements DbFile {
         ArrayList<Page> modifiedPages = new ArrayList<>();
 
         // Debug: Log the number of pages
-        System.out.println("Number of pages in file: " + this.numPages);
+        // System.out.println("Number of pages in file: " + this.numPages);
 
         for (int i = 0; i < this.numPages; i++) {
             HeapPageId pid = new HeapPageId(this.getId(), i);
@@ -166,7 +166,8 @@ public class HeapFile implements DbFile {
             // Debug: Log the page being checked
             System.out.println("Checking page: " + pid);
 
-            // access the page from the buffer pool
+            // access the page from the buffer pool, the buffer will handle reading from
+            // disk if needed
             HeapPage page = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
 
             // check if there is space in the page, if so insert the tuple
@@ -183,18 +184,20 @@ public class HeapFile implements DbFile {
         }
 
         // if there is no space in the pages, create a new page and insert the tuple
+
+        // create a new page ID, use numPages, since the count is starting form 0
         HeapPageId pid = new HeapPageId(this.getId(), this.numPages);
 
-        //get the page from the buffer, if not in the buffer, read from disk
+        // get the page from the buffer, if not in the buffer, read from disk
         HeapPage newPage = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
 
-        //mark the page as dirty
+        // mark the page as dirty
         newPage.markDirty(true, tid);
 
         // insert the tuple into the new page
         newPage.insertTuple(t);
 
-        //save the page as modified
+        // save the page as modified
         modifiedPages.add(newPage);
 
         // Increment numPages to reflect the new page
@@ -202,9 +205,13 @@ public class HeapFile implements DbFile {
 
         // Debug: Log the modified pages before returning
         System.out.println("Modified pages: ");
-        for (Page modifiedPage : modifiedPages) {
-            System.out.println(modifiedPage.getId());
-        }
+
+        /*
+         * for (Page modifiedPage : modifiedPages) {
+         * System.out.println(modifiedPage.getId());
+         * }
+         */
+
         return modifiedPages;
     }
 
@@ -213,9 +220,13 @@ public class HeapFile implements DbFile {
             TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
+
+        // cerate an array list since required as output an arrayList
         ArrayList<Page> modifiedPages = new ArrayList<>();
 
         RecordId rid = t.getRecordId();
+
+        // if no tuple found, exception
         if (rid == null) {
             throw new DbException("The record Id is not valid");
         }
