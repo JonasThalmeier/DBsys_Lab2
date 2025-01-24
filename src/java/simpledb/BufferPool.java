@@ -40,6 +40,7 @@ public class BufferPool {
      */
     public BufferPool(int numPages) {
         // some code goes here
+        // Initialize the buffer pool with the specified capacity.
         this.numPages = numPages;
         this.bufferpool = new ConcurrentHashMap<>(numPages);
     }
@@ -80,24 +81,25 @@ public class BufferPool {
         // Debug: Log the method call
         System.out.println("BufferPool.getPage called with PageId: " + pid + ", Permissions: " + perm);
 
+        // Check if the page is already in the buffer pool.
         if (bufferpool.containsKey(pid)) {
             System.out.println("Page found in BufferPool: " + pid);
             // Debug: Log page state after reading from disk
-            // Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
             Page pageBuffer = bufferpool.get(pid);
             if (pageBuffer instanceof HeapPage) {
                 HeapPage heapPage = (HeapPage) pageBuffer;
                 System.out.println("Page in Buffer. Empty slots: " + heapPage.getNumEmptySlots());
-                //System.out.println("Header state: " + Arrays.toString(heapPage.getHeaderBytes()));
             }
             return bufferpool.get(pid);
         }
 
+        // Evict a page if the buffer pool is full.
         if (bufferpool.size() >= numPages) {
             System.out.println("BufferPool is full. Size: " + bufferpool.size() + ", Capacity: " + numPages);
             //throw new DbException("Bufferpool is full");
             this.evictPage();
         }
+        // Load the page from disk and add it to the buffer pool.
         System.out.println("Page not found in BufferPool. Loading from disk: " + pid);
         Page pageBuffer = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
 
@@ -105,7 +107,6 @@ public class BufferPool {
         if (pageBuffer instanceof HeapPage) {
             HeapPage heapPage = (HeapPage) pageBuffer;
             System.out.println("Loaded page from disk. Empty slots: " + heapPage.getNumEmptySlots());
-            //System.out.println("Header state: " + Arrays.toString(heapPage.getHeaderBytes()));
         }
 
         bufferpool.put(pid, pageBuffer);
@@ -177,12 +178,17 @@ public class BufferPool {
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
+
+        // Retrieve the table's HeapFile from the catalog using its tableId.
         HeapFile table = (HeapFile) Database.getCatalog().getDatabaseFile(tableId);
+        // Call the HeapFile's insertTuple method to add the tuple.
+        // This method returns a list of pages that were modified by the operation.
         ArrayList<Page> modifiedPages = table.insertTuple(tid, t);
 
         // DEBUGGING
         System.out.println("Modified pages count: " + modifiedPages.size());
 
+        // Iterate through each modified page.
         for (Page page : modifiedPages) {
             page.markDirty(true, tid);
             bufferpool.put(page.getId(), page); // Replace any existing cached version
@@ -209,8 +215,13 @@ public class BufferPool {
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
+
+        // Retrieve the table's HeapFile from the catalog using the tableId from the tuple's RecordId.
         HeapFile table = (HeapFile) Database.getCatalog().getDatabaseFile(t.getRecordId().getPageId().getTableId());
+        // Call the HeapFile's deleteTuple method to remove the tuple.
+        // This method returns a list of pages that were modified by the operation.
         ArrayList<Page> modifiedPages = table.deleteTuple(tid, t);
+        // Iterate through each modified page.
         for (Page page : modifiedPages) {
             page.markDirty(true, tid);
             bufferpool.put(page.getId(), page); // Replace any existing cached version

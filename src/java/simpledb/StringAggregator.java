@@ -129,4 +129,3 @@ public class StringAggregator implements Aggregator {
         return new TupleIterator(td, results);
     }
 }
-

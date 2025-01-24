@@ -111,7 +111,7 @@ public class Aggregate extends Operator {
 
     public void open() throws NoSuchElementException, DbException,
 	    TransactionAbortedException {
-	// some code goes here
+	    // some code goes here
         // Open the child operator and aggregate tuples using the aggregator.
         super.open();
         child.open();
